@@ -11,10 +11,8 @@ import random
 
 logging.basicConfig(filename='erros.log',filemode='a',level=logging.ERROR)
 
-def conectar_com_pessoas_na_pagina_atual(driver,wait, window):
+def conectar_com_pessoas_na_pagina_atual(driver,wait, window,conexoes_enviadas=0):
     limite_diario = 20
-    conexoes_enviadas = 0
-    
     try:
         window.write_output('buscando por botões de conectar na página atual\n')
         rolar_pagina_totalmente_para_baixo(driver)
@@ -48,17 +46,19 @@ def conectar_com_pessoas_na_pagina_atual(driver,wait, window):
                 window.write_output(f'{nome} acaba de ser convidado!\n')
                 conexoes_enviadas += 1
                 
-                print(f'Enviado {conexoes_enviadas} de {limite_diario} conexões diárias')
+                window.write_output(f'Enviado {conexoes_enviadas} de {limite_diario} conexões diárias\n')
                 sleep(random.randint(2,5))
+                return conexoes_enviadas
             else:
                 # esperar 24 horas antes de continuar a execução
+                conexoes_enviadas = 0
                 sleep(86400)
                 
     except Exception as error:
         window.write_output('houve um erro ao tentar encontrar os botões para se conectar com outras pessoas, favor entrar em contato com o suporte\n')
         logging.error(error)
         
-def ir_para_proxima_pagina(driver, wait, window):
+def ir_para_proxima_pagina(driver, wait, window,conexoes_enviadas):
     # Verificar se é possível ir para a próxima página
     rolar_pagina_totalmente_para_baixo(driver)
     window.write_output('buscando botão de próxima página\n')
@@ -69,7 +69,7 @@ def ir_para_proxima_pagina(driver, wait, window):
     if botao_ir_para_proxima_pagina.is_enabled() is True:
         botao_ir_para_proxima_pagina.click()
         window.write_output('indo para a próxima página\n')
-        conectar_com_pessoas_na_pagina_atual(driver,window)
+        conectar_com_pessoas_na_pagina_atual(driver, wait, window,conexoes_enviadas)
     else:
         window.write_output('automação chegou à última página!\n')
         driver.quit()
@@ -78,7 +78,7 @@ def ir_para_proxima_pagina(driver, wait, window):
 def iniciar_driver():
     chrome_options = Options()
     
-    arguments = ['--lang=pt-BR', '--window-size=1920,1080']
+    arguments = ['--lang=pt-BR', '--window-size=1920,1080','--lang=pt-BR']
     for argument in arguments:
         chrome_options.add_argument(argument)
 
@@ -89,7 +89,7 @@ def iniciar_driver():
     })
     
     
-    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(options=chrome_options)
     
     wait = WebDriverWait(
         driver,
@@ -105,12 +105,12 @@ def iniciar_driver():
 
 def iniciar_automacao(palavra_chave,window):
     driver, wait = iniciar_driver()
-    # delete notifications, pop-ups, set language to pt-br, set default resolution
-    link_pesquisa_por_programadores = f'https://www.linkedin.com/search/results/people/?keywords={palavra_chave}&origin=SWITCH_SEARCH_VERTICAL&sid=oJd'
-
-    driver.get(link_pesquisa_por_programadores)
+    
+    link_pesquisa_por_palavra_chave = f'https://www.linkedin.com/search/results/people/?keywords={palavra_chave}&origin=SWITCH_SEARCH_VERTICAL&sid=oJd'
+   
+    driver.get(link_pesquisa_por_palavra_chave)
     iniciar_contagem_regressiva(60,1,window)
-    conectar_com_pessoas_na_pagina_atual(driver,wait, window)
-    ir_para_proxima_pagina(driver,wait, window)    
+    conexoes_enviadas = conectar_com_pessoas_na_pagina_atual(driver, wait, window,0)
+    ir_para_proxima_pagina(driver,wait, window, conexoes_enviadas)    
     sleep(random.randint(2,5))
    
