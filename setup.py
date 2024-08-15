@@ -9,7 +9,7 @@ if sys.platform == 'win32':
     base = 'Win32GUI'
     
 configuracao = Executable(
-    script='CustomTkinter-version.py',
+    script='main_gui_tkinter.py',
     icon='linkedin_automator.ico',
     base=base
 )
