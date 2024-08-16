@@ -1,5 +1,5 @@
 # LinkedIn Automator
-Automatiza a adição de novos contatos no Linkedin
+Automatiza a adição de novos contatos no Linkedin(respeitando o limite de 20 contatos diários)
 
 # Como usar [para não desenvolvedores]
 1. Baixe o arquivo como zip
